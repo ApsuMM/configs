@@ -46,7 +46,7 @@ iptables -A FORWARD -i $RED -o $BLUE -d 192.168.172.0/24 -p icmp -j ACCEPT
 # allow traffic from internal to external
 iptables -A FORWARD -i $BLUE -o $RED -j ACCEPT
 # allow returning traffic from external to internal
-iptables -A FORWARD -i $BLUE -o $RED -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+iptables -A FORWARD -i $RED -o $BLUE -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # add custom NAT rules
 iptables -t nat -A POSTROUTING -d 10.3.16.0/24 -j ACCEPT
