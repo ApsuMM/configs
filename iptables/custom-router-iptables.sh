@@ -26,6 +26,12 @@ iptables -A FORWARD -i $RED -p udp -m udp --dport 53 -j ACCEPT
 iptables -A FORWARD -i $RED -p tcp -m tcp --dport 53 -j ACCEPT
 iptables -t nat -A POSTROUTING -o $RED -p udp --sport 53 -j SNAT --to-source $EXT_IP
 iptables -t nat -A POSTROUTING -o $RED -p tcp --sport 53 -j SNAT --to-source $EXT_IP
+# allow routing of external icmp traffic
+iptables -A FORWARD -i $RED -o $BLUE -d 192.168.172.0/24 -p icmp -j ACCEPT
+# allow traffic from internal to external
+iptables -A FORWARD -i $BLUE -o $RED -j ACCEPT
+# allow returning traffic from external to internal
+iptables -A FORWARD -i $RED -o $BLUE -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # accept loopback traffic
 iptables -A INPUT -i lo -j ACCEPT
@@ -37,16 +43,6 @@ iptables -A INPUT -i $RED -d $EXT_IP -p icmp -j ACCEPT
 iptables -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 # allow rip traffic
 iptables -A INPUT -i $RED -p udp -m udp --dport 520 -j ACCEPT
-
-
-# allow routing of external icmp traffic
-iptables -A FORWARD -i $RED -o $BLUE -d 192.168.172.0/24 -p icmp -j ACCEPT
-
-
-# allow traffic from internal to external
-iptables -A FORWARD -i $BLUE -o $RED -j ACCEPT
-# allow returning traffic from external to internal
-iptables -A FORWARD -i $RED -o $BLUE -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 
 # add custom NAT rules
 iptables -t nat -A POSTROUTING -d 10.3.16.0/24 -j ACCEPT
