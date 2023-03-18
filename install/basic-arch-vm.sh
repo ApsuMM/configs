@@ -1,6 +1,11 @@
-#!/bin/sh
+#!/usr/bin/zsh
+
+HOSTNAME="workstation"
+PASSWD="P@ssw0rd"
 
 loadkeys de-latin1
+DISK=$(lsblk -ln | awk '$6=="disk" { print $1}') | head -n 1
+DEV="/dev/${DISK}"
 
 (
 echo g
@@ -23,15 +28,19 @@ echo
 echo
 echo
 echo w
-) | fdisk /dev/sda
+) | fdisk $DEV
 
-mkfs.fat -F 32 /dev/sda1
-mkswap /dev/sda2
-mkfs.ext4 /dev/sda3
+PBOOT="${DEV}1"
+PSWAP="${DEV}2"
+PDATA="${DEV}3"
 
-mount /dev/sda3 /mnt
-mount --mkdir /dev/sda1 /mnt/boot
-swapon /dev/sda2
+mkfs.fat -F 32 $PBOOT
+mkswap $PSWAP
+mkfs.ext4 $PDATA
+
+mount $PDATA /mnt
+mount --mkdir $PBOOT /mnt/boot
+swapon $PSWAP
 
 pacman -Sy archlinux-keyring --noconfirm
 pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
@@ -42,13 +51,14 @@ mkdir -p /etc/localtime
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 hwclock --systohc
 
-locale-gen
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+locale-gen
+
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo "KEYMAP=de-latin1" >> /etc/vconsole.conf
-echo "workstation" >> /etc/hostname
+echo $HOSTNAME >> /etc/hostname
 
-echo "root:P@ssw0rd" | chpasswd
+echo "root:$PASSWD" | chpasswd
 bootctl install
 
 cat <<EOF >> /boot/loader/loader.conf
@@ -62,7 +72,7 @@ cat <<EOF >> /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options root="/dev/sda3" rw
+options root=$PDATA rw
 EOF
 END
 reboot
