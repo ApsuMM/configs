@@ -4,7 +4,7 @@ HOSTNAME="workstation"
 PASSWD="P@ssw0rd"
 
 loadkeys de-latin1
-DISK=$(lsblk -ln | awk '$6=="disk" { print $1}') | head -n 1
+DISK=$(lsblk -ln | awk '$6=="disk" { print $1; exit}')
 DEV="/dev/${DISK}"
 
 (
