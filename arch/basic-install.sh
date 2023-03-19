@@ -5,6 +5,8 @@ PASSWD="P@ssw0rd"
 
 loadkeys de-latin1
 DISK=$(lsblk -ln | awk '$6=="disk" { print $1; exit}')
+[[ -z "$DISK" ]] && { echo "Error: No disk found"; exit 1; }
+
 DEV="/dev/${DISK}"
 
 (
