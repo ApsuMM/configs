@@ -49,9 +49,9 @@ pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
 genfstab -U /mnt >> /mnt/etc/fstab
 
 arch-chroot /mnt /bin/bash<<END
-mkdir -p /etc/localtime
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 hwclock --systohc
+mandb
 
 echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 locale-gen
