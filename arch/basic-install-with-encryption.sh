@@ -36,8 +36,10 @@ PBOOT="${DEV}1"
 PSWAP="${DEV}2"
 PDATA="${DEV}3"
 
-cryptsetup -y -v luksFormat $PDATA
-cryptsetup open $PDATA root
+echo $PASSWD | cryptsetup -y -v -q luksFormat $PDATA
+echo $PASSWD | cryptsetup open $PDATA root
+UUID=$(blkid -s UUID -o value $PDATA)
+
 mkfs.ext4 /dev/mapper/root
 
 mkfs.fat -F 32 $PBOOT
@@ -82,7 +84,7 @@ cat <<EOF >> /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-cryptdevice=UUID=$PDATA:root root=/dev/mapper/root
+cryptdevice=UUID=$UUID:root root=/dev/mapper/root
 options root=$PDATA rw
 EOF
 END
