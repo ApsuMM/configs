@@ -53,10 +53,6 @@ pacman -Sy archlinux-keyring --noconfirm
 pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
 genfstab -U /mnt >> /mnt/etc/fstab
 
-$OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
-$NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat-) encrypt)")
-sed -i 's/^HOOKS\=.*/$NEWHOOKS/' /mnt/etc/mkinitcpio.conf
-
 arch-chroot /mnt /bin/bash<<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
 hwclock --systohc
@@ -71,6 +67,10 @@ echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
 bootctl install
+
+$OLDHOOKS=$(grep '^HOOKS' /etc/mkinitcpio.conf)
+$NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
+sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /etc/mkinitcpio.conf
 mkinitcpio -P
 
 cat <<EOF >> /boot/loader/loader.conf
