@@ -37,9 +37,11 @@ PBOOT="${DEV}1"
 PSWAP="${DEV}2"
 PDATA="${DEV}3"
 
+modprobe dm-crypt
 echo $PASSWD | cryptsetup -y -v -q luksFormat $PDATA
 echo $PASSWD | cryptsetup open $PDATA root
 UUID=$(blkid -s UUID -o value $PDATA)
+UUIDDEV="${UUID}:root"
 
 mkfs.ext4 /dev/mapper/root
 
@@ -71,8 +73,9 @@ echo "KEYMAP=de-latin1" >> /etc/vconsole.conf
 echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
-bootctl install
-sed -i "s/^HOOKS\=.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
+bootctl --path=/boot/ install
+
+sed -i "s/^HOOKS\=.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt filesystems fsck)/" /etc/mkinitcpio.conf
 mkinitcpio -p linux
 
 cat <<EOF >> /boot/loader/loader.conf
@@ -86,7 +89,7 @@ cat <<EOF >> /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-options cryptdevice=UUID=$UUID:root root=/dev/mapper/root rw
+options cryptdevice=UUID=$UUIDDEV root=/dev/mapper/root rw
 EOF
 END
 umount -R /mnt
