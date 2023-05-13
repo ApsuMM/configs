@@ -72,7 +72,7 @@ echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
 bootctl install
-sed -i "s/^HOOKS\=.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /mnt/etc/mkinitcpio.conf
+sed -i "s/^HOOKS\=.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /etc/mkinitcpio.conf
 mkinitcpio -p linux
 
 cat <<EOF >> /boot/loader/loader.conf
@@ -89,6 +89,7 @@ initrd  /initramfs-linux.img
 options cryptdevice=UUID=$UUID:root root=/dev/mapper/root rw
 EOF
 END
+umount -R /mnt
 reboot
 
 
