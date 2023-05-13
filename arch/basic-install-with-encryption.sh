@@ -8,6 +8,7 @@ DISK=$(lsblk -ln | awk '$6=="disk" { print $1; exit}')
 [[ -z "$DISK" ]] && { echo "Error: No disk found"; exit 1; }
 
 DEV="/dev/${DISK}"
+wipefs $dev
 
 (
 echo g
@@ -71,7 +72,7 @@ bootctl install
 OLDHOOKS=$(grep '^HOOKS' /etc/mkinitcpio.conf)
 NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
 sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /etc/mkinitcpio.conf
-mkinitcpio -P
+mkinitcpio
 
 cat <<EOF >> /boot/loader/loader.conf
 default  arch.conf
