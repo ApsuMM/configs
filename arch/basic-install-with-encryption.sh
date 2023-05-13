@@ -36,9 +36,7 @@ PBOOT="${DEV}1"
 PSWAP="${DEV}2"
 PDATA="${DEV}3"
 
-cryptsetup luksFormat $PDATA
-systemd-cryptenroll $PDATA --recovery-key
-systemd-cryptenroll $PDATA --wipe-slot=empty --tpm2-device=auto
+cryptsetup -y -v luksFormat $PDATA
 cryptsetup open $PDATA root
 mkfs.ext4 /dev/mapper/root
 
