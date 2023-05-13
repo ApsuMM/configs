@@ -55,10 +55,9 @@ pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
 genfstab -U /mnt >> /mnt/etc/fstab
 echo "BLUBB!!!!"
 
-/usr/bin/env bash
-OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
-NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
-sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /mnt/etc/mkinitcpio.conf
+# OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
+# NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
+# sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt /bin/bash<<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
