@@ -8,7 +8,7 @@ DISK=$(lsblk -ln | awk '$6=="disk" { print $1; exit}')
 [[ -z "$DISK" ]] && { echo "Error: No disk found"; exit 1; }
 
 DEV="/dev/${DISK}"
-wipefs $DEV
+shred -v -n1 $DEV
 
 (
 echo g
@@ -53,7 +53,6 @@ swapon $PSWAP
 pacman -Sy archlinux-keyring --noconfirm
 pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
 genfstab -U /mnt >> /mnt/etc/fstab
-echo "BLUBB!!!!"
 
 # OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
 # NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
@@ -73,7 +72,8 @@ echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
 bootctl install
-mkinitcpio -P
+sed -i "s/^HOOKS\=.*/HOOKS=(base udev autodetect keyboard keymap modconf block encrypt lvm2 filesystems fsck)/" /mnt/etc/mkinitcpio.conf
+mkinitcpio -p linux
 
 cat <<EOF >> /boot/loader/loader.conf
 default  arch.conf
@@ -86,8 +86,7 @@ cat <<EOF >> /boot/loader/entries/arch.conf
 title   Arch Linux
 linux   /vmlinuz-linux
 initrd  /initramfs-linux.img
-cryptdevice=UUID=$UUID:root root=/dev/mapper/root
-options root=$PDATA rw
+options cryptdevice=UUID=$UUID:root root=/dev/mapper/root rw
 EOF
 END
 reboot
