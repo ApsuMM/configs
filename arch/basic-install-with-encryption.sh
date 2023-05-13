@@ -55,8 +55,7 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 $OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
 $NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat-) encrypt)")
-
-mkinitcpio -P
+sed -i 's/^HOOKS\=.*/$NEWHOOKS/' /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt /bin/bash<<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
@@ -72,6 +71,7 @@ echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
 bootctl install
+mkinitcpio -P
 
 cat <<EOF >> /boot/loader/loader.conf
 default  arch.conf
