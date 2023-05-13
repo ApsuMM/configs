@@ -68,8 +68,8 @@ echo $HOSTNAME >> /etc/hostname
 echo "root:$PASSWD" | chpasswd
 bootctl install
 
-$OLDHOOKS=$(grep '^HOOKS' /etc/mkinitcpio.conf)
-$NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
+OLDHOOKS=$(grep '^HOOKS' /etc/mkinitcpio.conf)
+NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
 sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /etc/mkinitcpio.conf
 mkinitcpio -P
 
