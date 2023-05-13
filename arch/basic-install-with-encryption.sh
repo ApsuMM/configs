@@ -8,7 +8,7 @@ DISK=$(lsblk -ln | awk '$6=="disk" { print $1; exit}')
 [[ -z "$DISK" ]] && { echo "Error: No disk found"; exit 1; }
 
 DEV="/dev/${DISK}"
-wipefs $dev
+wipefs $DEV
 
 (
 echo g
@@ -54,12 +54,12 @@ pacman -Sy archlinux-keyring --noconfirm
 pacstrap /mnt base linux linux-firmware vim tldr man-db man-pages
 genfstab -U /mnt >> /mnt/etc/fstab
 
-cat <<EOF >> hooks.sh
+/usr/bin/env bash
 OLDHOOKS=$(grep '^HOOKS' /mnt/etc/mkinitcpio.conf)
 NEWHOOKS=$(echo $OLDHOOKS | sed 's/.$//' | echo "$(cat -) encrypt)")
 sed -i "s/^HOOKS\=.*/$NEWHOOKS/" /mnt/etc/mkinitcpio.conf
 EOF
-bash hooks.sh
+exit
 
 arch-chroot /mnt /bin/bash<<END
 ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
@@ -75,7 +75,6 @@ echo $HOSTNAME >> /etc/hostname
 
 echo "root:$PASSWD" | chpasswd
 bootctl install
-
 mkinitcpio -P
 
 cat <<EOF >> /boot/loader/loader.conf
